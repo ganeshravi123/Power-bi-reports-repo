@@ -1,0 +1,53 @@
+name: Power BI CI/CD Pipeline
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  deploy-to-uat:
+    name: Deploy to UAT
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        
+      - name: Deploy PBIX to UAT
+        run: |
+          echo "Deploying PBIX file to UAT..."
+          # Add your script to deploy PBIX to UAT folder (e.g., using PowerShell or REST API)
+      
+      - name: Create a comment for the review
+        run: |
+          echo "Deployment to UAT is completed. Please review the changes."
+      
+  review-and-approve:
+    name: Review and Approve
+    runs-on: ubuntu-latest
+    needs: deploy-to-uat
+    steps:
+      - name: Wait for Review Approval
+        run: |
+          echo "Waiting for reviewer to approve the changes..."
+          # You can use GitHub's manual approval action if needed (or add comments for manual review)
+    
+  deploy-to-prod:
+    name: Deploy to Prod
+    runs-on: ubuntu-latest
+    needs: review-and-approve
+    if: ${{ github.event.pull_request.merged }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        
+      - name: Deploy PBIX to Prod
+        run: |
+          echo "Deploying PBIX file to Production..."
+          # Add your script to deploy PBIX to Production folder (e.g., using PowerShell or REST API)
+      
+      - name: Merge to Prod Branch
+        run: |
+          git checkout prod
+          git merge main
+          git push origin prod

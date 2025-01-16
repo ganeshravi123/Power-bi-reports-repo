@@ -1,0 +1,38 @@
+name: Power-bi Project Workflow
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+
+jobs:
+  build-and-deploy:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install jq (JSON processor)
+        run: sudo apt-get install -y jq
+
+      - name: Install Node.js and npm
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+
+      - name: Install JSON npm packages
+        run: |
+          npm install -g json
+          npm install -g jsonlint
+
+      - name: Push main branch into production
+        uses: codingforentrepreneurs/action-branch-to-branch@main
+        with:
+          dest_branch: 'UAT-V1'
+          source_branch: 'main'
+          commit_message: 'Release UAT version'
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_SECRET }}
